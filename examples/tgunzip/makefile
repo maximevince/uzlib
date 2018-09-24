@@ -14,6 +14,7 @@ objects = tgunzip.o
 libs    = ../../lib/libtinf.a
 
 COPT    = -Os
+COPT    += -DNO_DICT=1
 CFLAGS  = -Wall -I../../src $(COPT)
 LDFLAGS = $(CFLAGS) -s -Wl,-Map,ld.map
 

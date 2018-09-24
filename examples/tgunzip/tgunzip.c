@@ -114,8 +114,12 @@ int main(int argc, char *argv[])
     /* -- decompress data -- */
 
     struct uzlib_uncomp d;
+#if NO_DICT
+    uzlib_uncompress_init(&d);
+#else
 //    uzlib_uncompress_init(&d, malloc(32768), 32768);
     uzlib_uncompress_init(&d, NULL, 0);
+#endif
 
     /* all 3 fields below must be initialized by user */
     d.source = source;

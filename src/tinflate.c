@@ -444,6 +444,7 @@ static int tinf_inflate_block_data(TINF_DATA *d, TINF_TREE *lt, TINF_TREE *dt)
         offs = tinf_read_bits(d, dist_bits[dist], dist_base[dist]);
 
         /* calculate and validate actual LZ offset to use */
+#if !NO_DICT
         if (d->dict_ring) {
             if (offs > d->dict_size) {
                 return TINF_DICT_ERROR;
@@ -462,7 +463,9 @@ static int tinf_inflate_block_data(TINF_DATA *d, TINF_TREE *lt, TINF_TREE *dt)
             if (d->lzOff < 0) {
                 d->lzOff += d->dict_size;
             }
-        } else {
+        } else
+#endif // !NO_DICT
+        {
             /* catch trying to point before the start of dest buffer */
             if (offs > d->dest - d->destStart) {
                 return TINF_DATA_ERROR;
@@ -471,13 +474,16 @@ static int tinf_inflate_block_data(TINF_DATA *d, TINF_TREE *lt, TINF_TREE *dt)
         }
     }
 
+#if !NO_DICT
     /* copy next byte from dict substring */
     if (d->dict_ring) {
         TINF_PUT(d, d->dict_ring[d->lzOff]);
         if ((unsigned)++d->lzOff == d->dict_size) {
             d->lzOff = 0;
         }
-    } else {
+    } else
+#endif // !NO_DICT
+    {
         d->dest[0] = d->dest[d->lzOff];
         d->dest++;
     }
@@ -536,15 +542,21 @@ void uzlib_init(void)
 }
 
 /* initialize decompression structure */
+#if NO_DICT
+void uzlib_uncompress_init(TINF_DATA *d)
+#else
 void uzlib_uncompress_init(TINF_DATA *d, void *dict, unsigned int dictLen)
+#endif
 {
    d->eof = 0;
    d->bitcount = 0;
    d->bfinal = 0;
    d->btype = -1;
+#if !NO_DICT
    d->dict_size = dictLen;
    d->dict_ring = dict;
    d->dict_idx = 0;
+#endif
    d->curlen = 0;
 }
 

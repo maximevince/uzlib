@@ -89,9 +89,11 @@ struct uzlib_uncomp {
     int bfinal;
     unsigned int curlen;
     int lzOff;
+#if !NO_DICT
     unsigned char *dict_ring;
     unsigned int dict_size;
     unsigned int dict_idx;
+#endif
 
     TINF_TREE ltree; /* dynamic length/symbol tree */
     TINF_TREE dtree; /* dynamic distance tree */
@@ -99,18 +101,29 @@ struct uzlib_uncomp {
 
 #include "tinf_compat.h"
 
+#if NO_DICT
+#define TINF_PUT(d, c) \
+    { \
+        *d->dest++ = c; \
+    }
+#else
 #define TINF_PUT(d, c) \
     { \
         *d->dest++ = c; \
         if (d->dict_ring) { d->dict_ring[d->dict_idx++] = c; if (d->dict_idx == d->dict_size) d->dict_idx = 0; } \
     }
+#endif
 
 unsigned char TINFCC uzlib_get_byte(TINF_DATA *d);
 
 /* Decompression API */
 
 void TINFCC uzlib_init(void);
+#if NO_DICT
+void TINFCC uzlib_uncompress_init(TINF_DATA *d);
+#else
 void TINFCC uzlib_uncompress_init(TINF_DATA *d, void *dict, unsigned int dictLen);
+#endif
 int  TINFCC uzlib_uncompress(TINF_DATA *d);
 int  TINFCC uzlib_uncompress_chksum(TINF_DATA *d);
 
