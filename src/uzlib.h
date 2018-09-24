@@ -63,12 +63,14 @@ struct uzlib_uncomp {
     const unsigned char *source;
     /* Pointer to the next byte past the input buffer (source_limit = source + len) */
     const unsigned char *source_limit;
+#if !NO_CB
     /* If source_limit == NULL, or source >= source_limit, this function
        will be used to read next byte from source stream. The function may
        also return -1 in case of EOF (or irrecoverable error). Note that
        besides returning the next byte, it may also update source and
        source_limit fields, thus allowing for buffered operation. */
     int (*source_read_cb)(struct uzlib_uncomp *uncomp);
+#endif
 
     unsigned int tag;
     unsigned int bitcount;
@@ -101,18 +103,20 @@ struct uzlib_uncomp {
 
 #include "tinf_compat.h"
 
-#if NO_DICT
+#ifndef TINF_PUT
+#if NO_DICT // NO_DICT != 0
 #define TINF_PUT(d, c) \
     { \
         *d->dest++ = c; \
     }
-#else
+#else // NO_DICT == 0
 #define TINF_PUT(d, c) \
     { \
         *d->dest++ = c; \
         if (d->dict_ring) { d->dict_ring[d->dict_idx++] = c; if (d->dict_idx == d->dict_size) d->dict_idx = 0; } \
     }
-#endif
+#endif // NO_DICT == 0
+#endif // !defined(TINF_PUT)
 
 unsigned char TINFCC uzlib_get_byte(TINF_DATA *d);
 

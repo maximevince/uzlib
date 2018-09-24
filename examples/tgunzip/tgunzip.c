@@ -124,7 +124,9 @@ int main(int argc, char *argv[])
     /* all 3 fields below must be initialized by user */
     d.source = source;
     d.source_limit = source + len - 4;
+#if !NO_CB
     d.source_read_cb = NULL;
+#endif
 
     res = uzlib_gzip_parse_header(&d);
     if (res != TINF_OK) {

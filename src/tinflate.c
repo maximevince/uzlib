@@ -197,6 +197,7 @@ unsigned char uzlib_get_byte(TINF_DATA *d)
         return *d->source++;
     }
 
+#if !NO_CB
     /* Otherwise if there's callback and we haven't seen EOF yet, try to
        read next byte using it. (Note: the callback can also update ->source
        and ->source_limit). */
@@ -206,6 +207,7 @@ unsigned char uzlib_get_byte(TINF_DATA *d)
             return (unsigned char)val;
         }
     }
+#endif
 
     /* Otherwise, we hit EOF (either from ->readSource() or from exhaustion
        of the buffer), and it will be "sticky", i.e. further calls to this
