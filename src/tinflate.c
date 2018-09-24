@@ -189,6 +189,7 @@ static void tinf_build_tree(TINF_TREE *t, const unsigned char *lengths, unsigned
  * -- decode functions -- *
  * ---------------------- */
 
+#if !NO_CB
 unsigned char uzlib_get_byte(TINF_DATA *d)
 {
     /* If end of source buffer is not reached, return next byte from source
@@ -197,7 +198,6 @@ unsigned char uzlib_get_byte(TINF_DATA *d)
         return *d->source++;
     }
 
-#if !NO_CB
     /* Otherwise if there's callback and we haven't seen EOF yet, try to
        read next byte using it. (Note: the callback can also update ->source
        and ->source_limit). */
@@ -207,7 +207,6 @@ unsigned char uzlib_get_byte(TINF_DATA *d)
             return (unsigned char)val;
         }
     }
-#endif
 
     /* Otherwise, we hit EOF (either from ->readSource() or from exhaustion
        of the buffer), and it will be "sticky", i.e. further calls to this
@@ -216,6 +215,7 @@ unsigned char uzlib_get_byte(TINF_DATA *d)
 
     return 0;
 }
+#endif // NO_CB == 0
 
 uint32_t tinf_get_le_uint32(TINF_DATA *d)
 {

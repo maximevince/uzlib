@@ -118,7 +118,11 @@ struct uzlib_uncomp {
 #endif // NO_DICT == 0
 #endif // !defined(TINF_PUT)
 
+#if NO_CB // NO_CB != 0
+#define uzlib_get_byte(d) (*(d)->source++)
+#else
 unsigned char TINFCC uzlib_get_byte(TINF_DATA *d);
+#endif
 
 /* Decompression API */
 
