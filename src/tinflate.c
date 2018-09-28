@@ -189,12 +189,13 @@ static void tinf_build_tree(TINF_TREE *t, const unsigned char *lengths, unsigned
  * -- decode functions -- *
  * ---------------------- */
 
+#if !NO_CB
 unsigned char uzlib_get_byte(TINF_DATA *d)
 {
     /* If end of source buffer is not reached, return next byte from source
        buffer. */
     if (d->source < d->source_limit) {
-        return *d->source++;
+        return ALIGN_READ(d->source++);
     }
 
     /* Otherwise if there's callback and we haven't seen EOF yet, try to
@@ -214,6 +215,7 @@ unsigned char uzlib_get_byte(TINF_DATA *d)
 
     return 0;
 }
+#endif // NO_CB == 0
 
 uint32_t tinf_get_le_uint32(TINF_DATA *d)
 {
@@ -484,7 +486,8 @@ static int tinf_inflate_block_data(TINF_DATA *d, TINF_TREE *lt, TINF_TREE *dt)
     } else
 #endif // !NO_DICT
     {
-        d->dest[0] = d->dest[d->lzOff];
+        //d->dest[0] = d->dest[d->lzOff];
+        ALIGN_WRITE(d->dest, d->dest[d->lzOff]);
         d->dest++;
     }
     d->curlen--;
