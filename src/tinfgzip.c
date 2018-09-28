@@ -46,7 +46,7 @@ uint16_t tinf_get_uint16(TINF_DATA *d);
 
 void tinf_skip_bytes(TINF_DATA *d, int num)
 {
-    while (num--) uzlib_get_byte(d);
+    while (num--) (void)uzlib_get_byte(d);
 }
 
 uint16_t tinf_get_uint16(TINF_DATA *d)
