@@ -1,0 +1,1 @@
+(cd ../..; make clean; make); valgrind ./uzf 0c 0 && diff 0 0u && echo ok
