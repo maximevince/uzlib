@@ -1,11 +1,11 @@
 /*
- * tinflate  -  tiny inflate
+ * uzlib  -  tiny deflate/inflate library (deflate, gzip, zlib)
  *
  * Copyright (c) 2003 by Joergen Ibsen / Jibz
  * All Rights Reserved
  * http://www.ibsensoftware.com/
  *
- * Copyright (c) 2014-2016 by Paul Sokolovsky
+ * Copyright (c) 2014-2018 by Paul Sokolovsky
  *
  * This software is provided 'as-is', without any express
  * or implied warranty.  In no event will the authors be
@@ -572,7 +572,9 @@ int uzlib_uncompress(TINF_DATA *d)
 
         /* start a new block */
         if (d->btype == -1) {
+            int old_btype;
 next_blk:
+            old_btype = d->btype;
             /* read final block flag */
             d->bfinal = tinf_getbit(d);
             /* read block type (2 bits) */
@@ -582,7 +584,7 @@ next_blk:
             printf("Started new block: type=%d final=%d\n", d->btype, d->bfinal);
             #endif
 
-            if (d->btype == 1) {
+            if (d->btype == 1 && old_btype != 1) {
                 /* build fixed huffman trees */
                 tinf_build_fixed_trees(&d->ltree, &d->dtree);
             } else if (d->btype == 2) {
