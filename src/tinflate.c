@@ -195,7 +195,8 @@ unsigned char uzlib_get_byte(TINF_DATA *d)
     /* If end of source buffer is not reached, return next byte from source
        buffer. */
     if (d->source < d->source_limit) {
-        return ALIGN_READ(d->source++);
+        //return ALIGN_READ(d->source++);
+        return ALIGN_READ_INC(d->source);
     }
 
     /* Otherwise if there's callback and we haven't seen EOF yet, try to
@@ -487,7 +488,7 @@ static int tinf_inflate_block_data(TINF_DATA *d, TINF_TREE *lt, TINF_TREE *dt)
 #endif // !NO_DICT
     {
         //d->dest[0] = d->dest[d->lzOff];
-        ALIGN_WRITE(d->dest, d->dest[d->lzOff]);
+        ALIGN_WRITE(d->dest, ALIGN_READ(d->dest + d->lzOff));
         d->dest++;
     }
     d->curlen--;

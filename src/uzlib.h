@@ -111,6 +111,10 @@ struct uzlib_uncomp {
 #define ALIGN_WRITE(x,y) do { (*x) = (y); } while (0)
 #endif
 
+#ifndef ALIGN_READ_INC
+#define ALIGN_READ_INC(x) ({ __typeof__(*x) ret = ALIGN_READ(x); (x)++; ret; })
+#endif
+
 #ifndef TINF_PUT
 #if NO_DICT
 #define TINF_PUT(d, c) \
@@ -128,8 +132,9 @@ struct uzlib_uncomp {
 #endif // NO_DICT == 0
 #endif // !defined(TINF_PUT)
 
-#if NO_CB // NO_CB != 0
-#define uzlib_get_byte(d) ALIGN_READ(d->source++)
+#if NO_CB
+//#define uzlib_get_byte(d) ALIGN_READ(d->source++)
+#define uzlib_get_byte(d) ALIGN_READ_INC(d->source)
 #else
 unsigned char TINFCC uzlib_get_byte(TINF_DATA *d);
 #endif

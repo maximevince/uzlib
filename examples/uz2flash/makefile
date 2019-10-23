@@ -12,10 +12,11 @@
 target  = uzf
 objects = uzf.o
 
-COPT    = -O0 -g
+COPT    = -g
 COPT    += -DNO_DICT=1 -DNO_CB=1
-CFLAGS  = -Wall -I../../src $(COPT)
-LDFLAGS = $(CFLAGS) -s -Wl,-Map,ld.map
+CFLAGS  = -Wall -Wextra -Werror -I../../src $(COPT)
+#LDFLAGS = $(CFLAGS) -s -Wl,-Map,ld.map
+LDFLAGS = $(CFLAGS)
 
 .PHONY: all clean
 

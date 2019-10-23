@@ -35,17 +35,60 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
+#include <string.h>
 
+
+#define TMPSZ 512
+unsigned char tmp [TMPSZ];
+
+unsigned int len, outlen;
+const unsigned char *source;
+unsigned char *dest;
+off_t tmpshift;
+
+#define FLASH 1
+
+#define WITHIN(p,start,len) ((((p) - (start)) >= 0) && (((start) - (p)) + (len) > 0))
+
+#if FLASH
+
+unsigned char* flashed;
+
+unsigned char align_read (const unsigned char* s)
+{
+	if (WITHIN(s, flashed, TMPSZ))
+		return *(s - flashed + tmp);
+
+	assert(WITHIN(s, source, len) || WITHIN(s, dest, flashed - dest));
+	
+	return *s;
+}
+
+void align_write (unsigned char* d, unsigned char v)
+{
+	// ensure we are always writing in tmp
+	assert(((long)d - (long)tmp) >= 0 && ((long)tmp + TMPSZ - (long)d) < outlen);
+
+	tmp[d - dest - tmpshift] = v;
+}
+
+#define ALIGN_READ(x) align_read(x)
+#define ALIGN_WRITE(x,y) align_write((x), (y))
+
+#else
+#pragma message "NO FLASH"
+#endif
+	
 #include "adler32.c"
 #include "crc32.c"
 
 #include "tinflate.c"
 #include "tinfgzip.c"
-#include "tinfzlib.c"
 
 /* produce decompressed output in chunks of this size */
 /* defauly is to decompress byte by byte; can be any other length */
-#define OUT_CHUNK_SIZE 512
+#define OUT_CHUNK_SIZE TMPSZ
 
 void exit_error(const char *what)
 {
@@ -56,9 +99,7 @@ void exit_error(const char *what)
 int main(int argc, char *argv[])
 {
     FILE *fin, *fout;
-    unsigned int len, dlen, outlen;
-    const unsigned char *source;
-    unsigned char *dest;
+    unsigned int dlen;
     int res;
 
     printf("tgunzip - example from the tiny inflate library (www.ibsensoftware.com)\n\n");
@@ -136,12 +177,27 @@ int main(int argc, char *argv[])
     }
 
     d.dest_start = d.dest = dest;
+    
+#if FLASH
+    flashed = dest;
+#endif
 
     while (dlen) {
         unsigned int chunk_len = dlen < OUT_CHUNK_SIZE ? dlen : OUT_CHUNK_SIZE;
+#if FLASH
+	tmpshift = d.dest - dest;
+#endif
         d.dest_limit = d.dest + chunk_len;
         res = uzlib_uncompress(&d);
         dlen -= chunk_len;
+        
+	//printf("CHUNK\n");
+#if FLASH
+        // FLASH CHUNK - copy tmp to realdest
+        memcpy(flashed, tmp, chunk_len);
+        flashed += chunk_len;
+#endif
+        
         if (res != TINF_OK) {
             break;
         }
