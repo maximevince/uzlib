@@ -38,6 +38,26 @@
 #include <assert.h>
 #include <string.h>
 
+/*
+
+    This example is a use case for esp8266 where all compressed data is accessible from flash
+    and are inflated to flash (like in OTA operations).
+    Flash constraints are:
+    - only 32 bit access
+    - wear leveling: reduce the number of write on flash blocks (512 bytes in this example)
+    - not much ram (dictionary disabled: uncompressed data = flash are used for dictionary)
+
+    This example uncompresses data to a temporary 512 bytes block, and move
+    it to flash everytime it is full.
+
+    The align_read() function goes get data from already inflated data from
+    flash when they are outside from the 512bytes temp buffer.
+
+*/
+
+
+#define NO_DICT 1
+#define NO_CB 1
 
 #define TMPSZ 512
 unsigned char tmp [TMPSZ];
