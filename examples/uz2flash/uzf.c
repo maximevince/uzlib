@@ -45,7 +45,10 @@
     Flash constraints are:
     - only 32 bit access
     - wear leveling: reduce the number of write on flash blocks (512 bytes in this example)
-    - not much ram (dictionary disabled: uncompressed data = flash are used for dictionary)
+    - not much ram (specific dictionary code is disabled:
+                    then full-dest-in-memory is forced, inflated data are
+                    fetched from freshly written flash memory
+                    using ALIGN_READ and ALIGN_WRITE macros)
 
     This example uncompresses data to a temporary 512 bytes block, and move
     it to flash everytime it is full.
