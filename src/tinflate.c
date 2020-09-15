@@ -35,6 +35,9 @@
 #include <assert.h>
 #include "tinf.h"
 
+// for debugging
+#include <stdio.h>
+
 #define UZLIB_DUMP_ARRAY(heading, arr, size) \
     { \
         printf("%s", heading); \
@@ -465,7 +468,12 @@ static int tinf_inflate_block_data(TINF_DATA *d, TINF_TREE *lt, TINF_TREE *dt)
         } else {
             /* catch trying to point before the start of dest buffer */
             if (offs > d->dest - d->destStart) {
-                return TINF_DATA_ERROR;
+                if (d->dest_ext) {
+                    printf("FIXME: offset outside of current rambuffer, using dest_ext (len: %d)\n", d->decompressed_len);
+                    //return TINF_DATA_ERROR;
+                } else {
+                    return TINF_DATA_ERROR;
+                }
             }
             d->lzOff = -offs;
         }
@@ -478,8 +486,31 @@ static int tinf_inflate_block_data(TINF_DATA *d, TINF_TREE *lt, TINF_TREE *dt)
             d->lzOff = 0;
         }
     } else {
-        d->dest[0] = d->dest[d->lzOff];
+        /* maximevince:
+         * we can refer to the previously written data in two ways:
+         *  1. it's within the current buffer [d->dest_start : d->dest]
+         *  2. it's prior to the currnt buffer, therefor in our "external" buffer (e.g. written to external flash)
+         */
+        if ((d->dest + d->lzOff) < d->dest_start) {
+            /* lookup in external buffer, if available */
+            if (d->dest_ext) {
+                int start_offs = d->decompressed_len + d->lzOff;
+                if (start_offs < 0) {
+                    return TINF_DATA_ERROR;
+                }
+                printf("lzOff preceding start of dest buffer\n");
+                printf("lzOff: %d\n", d->lzOff);
+                printf("lzOff from start: %d\n", start_offs);
+                d->dest[0] = d->dest_ext[start_offs];
+            } else {
+                printf("lzOff preceding start of dest buffer\n");
+                return TINF_DATA_ERROR;
+            }
+        } else {
+            d->dest[0] = d->dest[d->lzOff];
+        }
         d->dest++;
+        d->decompressed_len++;
     }
     d->curlen--;
     return TINF_OK;
@@ -545,6 +576,8 @@ void uzlib_uncompress_init(TINF_DATA *d, void *dict, unsigned int dictLen)
    d->dict_size = dictLen;
    d->dict_ring = dict;
    d->dict_idx = 0;
+   d->decompressed_len = 0;
+   d->dest_ext = 0;
    d->curlen = 0;
 }
 
