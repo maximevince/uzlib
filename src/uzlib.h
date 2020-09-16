@@ -104,7 +104,6 @@ struct uzlib_uncomp {
     /* Pointer past the end of the dest buffer, similar to source_limit */
     unsigned char *dest_limit;
     /* External destination buffer, this is where would be written to, after decompressing a chunk */
-    unsigned char *dest_ext;
 
     /* Accumulating checksum */
     unsigned int checksum;
@@ -118,7 +117,6 @@ struct uzlib_uncomp {
     unsigned char *dict_ring;
     unsigned int dict_size;
     unsigned int dict_idx;
-    unsigned int decompressed_len; /* total bytes decompressed (used for dest_ext lookups) */
 
     TINF_TREE ltree; /* dynamic length/symbol tree */
     TINF_TREE dtree; /* dynamic distance tree */
@@ -126,10 +124,20 @@ struct uzlib_uncomp {
 
 #include "tinf_compat.h"
 
+
+#ifndef TINF_DEST_PUTC
+#define TINF_DEST_PUTC(c) do { *d->dest = c; } while(0)
+#endif
+
+#ifndef TINF_DEST_GETC
+#define TINF_DEST_GETC(addr) ({ unsigned char ret = *addr; ret; })
+#endif
+
 #define TINF_PUT(d, c) \
     { \
-        *d->dest++ = c; \
-        d->decompressed_len++; \
+        /*XXX: *d->dest++ = c; */ \
+        TINF_DEST_PUTC(c); \
+        d->dest++; \
         if (d->dict_ring) { d->dict_ring[d->dict_idx++] = c; if (d->dict_idx == d->dict_size) d->dict_idx = 0; } \
     }
 
