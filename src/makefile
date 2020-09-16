@@ -14,6 +14,7 @@ objects = tinflate.o tinfgzip.o tinfzlib.o adler32.o crc32.o \
     defl_static.o genlz77.o
 
 COPT    = -Os
+COPT    += -DNO_DICT=1 -DNO_CB=1
 CFLAGS  = -Wall $(COPT)
 LDFLAGS = $(CFLAGS) -s
 

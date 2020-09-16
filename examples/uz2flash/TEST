@@ -1,0 +1,7 @@
+#!/bin/sh
+
+if [ ! -r 0c ]; then
+    (cd ../..; tar cf - .) > 0u
+    gzip -c9 < 0u > 0c
+fi
+(make clean; make); valgrind ./uzf 0c 0 && diff 0 0u && echo ok
