@@ -498,9 +498,8 @@ static int tinf_inflate_block_data(TINF_DATA *d, TINF_TREE *lt, TINF_TREE *dt)
                 if (start_offs < 0) {
                     return TINF_DATA_ERROR;
                 }
-                printf("lzOff preceding start of dest buffer\n");
-                printf("lzOff: %d\n", d->lzOff);
-                printf("lzOff from start: %d\n", start_offs);
+                printf("lzOff: %d is < d->data_start", d->lzOff);
+                printf(" --> d->data_ext[%d]\n", start_offs);
                 d->dest[0] = d->dest_ext[start_offs];
             } else {
                 printf("lzOff preceding start of dest buffer\n");
