@@ -19,6 +19,16 @@
 #define UZLIB_CONF_PARANOID_CHECKS 0
 #endif
 
+#ifndef UZLIB_CONF_USE_MEMCPY
+/* Use memcpy() for copying data out of LZ window or uncompressed blocks,
+   instead of doing this byte by byte. For well-compressed data, this
+   may noticeably increase decompression speed. But for less compressed,
+   it can actually deteriorate it (due to the fact that many memcpy()
+   implementations are optimized for large blocks of data, and have
+   too much overhead for short strings of just a few bytes). */
+#define UZLIB_CONF_USE_MEMCPY 0
+#endif
+
 /* Custom TINF_DEST_PUTC / TINF_DEST_GETC implementation */
 
 #define TINF_DEST_PUTC uzlib_dest_putc
