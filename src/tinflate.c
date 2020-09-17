@@ -37,9 +37,6 @@
 #include "tinf.h"
 #include "uzlib_conf.h"
 
-// for debugging
-#include <stdio.h>
-
 #define UZLIB_DUMP_ARRAY(heading, arr, size) \
     { \
         printf("%s", heading); \
