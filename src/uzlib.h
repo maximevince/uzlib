@@ -103,7 +103,6 @@ struct uzlib_uncomp {
     unsigned char *dest;
     /* Pointer past the end of the dest buffer, similar to source_limit */
     unsigned char *dest_limit;
-    /* External destination buffer, this is where would be written to, after decompressing a chunk */
 
     /* Accumulating checksum */
     unsigned int checksum;
@@ -130,12 +129,11 @@ struct uzlib_uncomp {
 #endif
 
 #ifndef TINF_DEST_GETC
-#define TINF_DEST_GETC(addr) ({ unsigned char ret = *addr; ret; })
+#define TINF_DEST_GETC(addr) ({ unsigned char ret = *(addr); ret; })
 #endif
 
 #define TINF_PUT(d, c) \
     { \
-        /*XXX: *d->dest++ = c; */ \
         TINF_DEST_PUTC(c); \
         d->dest++; \
         if (d->dict_ring) { d->dict_ring[d->dict_idx++] = c; if (d->dict_idx == d->dict_size) d->dict_idx = 0; } \

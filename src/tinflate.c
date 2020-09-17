@@ -482,7 +482,6 @@ static int tinf_inflate_block_data(TINF_DATA *d, TINF_TREE *lt, TINF_TREE *dt)
             d->lzOff = 0;
         }
     } else {
-        //d->dest[0] = d->dest[d->lzOff];
         TINF_DEST_PUTC(TINF_DEST_GETC(d->dest + d->lzOff));
         d->dest++;
     }
